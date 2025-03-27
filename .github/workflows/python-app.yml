@@ -27,10 +27,10 @@ jobs:
         pip install -r requirements.txt
     - name: Print environment variables
       run: |
-        echo "WEBHOOK_URL: ${{ env.WEBHOOK_URL }}"
+        echo "WEBHOOK_URL: $WEBHOOK_URL"
     - name: Print secret WEBHOOK_URL
       run: |
-        echo "Secret WEBHOOK_URL: $WEBHOOK_URL"
+        echo "Secret WEBHOOK_URL: ${{ WEBHOOK_URL }}"
     - name: Run price tracker
       run: |
         
