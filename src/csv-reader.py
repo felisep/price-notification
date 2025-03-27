@@ -1,6 +1,5 @@
+import os
 import pandas as pd
-from urllib3.util import url
-
 import scraper
 import requests
 import sys
@@ -29,25 +28,29 @@ def send_discord_message(message, webhook):
         print(f"Failed to send message to Discord: {response.status_code}, {response.text}")
 
 
-def track_prices(file_path, webhook_url):
-    df = pd.read_csv(file_path, delimiter=',')  # Ensure correct delimiter
+def track_prices(file_path, webhook):
+    abs_file_path = os.path.abspath(file_path)
+    if not os.path.isfile(abs_file_path):
+        raise FileNotFoundError(f"The file {abs_file_path} does not exist.")
+
+    df = pd.read_csv(abs_file_path, delimiter=',')  # Ensure correct delimiter
     df['price'] = df['price'].astype(str)  # Cast the price column to string
 
     for index, row in df.iterrows():
-        url = row['url']
+        url_variable = row['url']
         selector = row['selector']
         old_price = row['price']
         company = row['company']
 
         # Ensure the URL is valid
-        if not url.startswith('http'):
-            print(f"Skipping invalid URL: {url}")
+        if not url_variable.startswith('http'):
+            print(f"Skipping invalid URL: {url_variable}")
             continue
 
-        new_price = scraper.get_page([url], [selector])[0]
+        new_price = scraper.get_page([url_variable], [selector])[0]
 
         if new_price and clean_number(new_price) != clean_number(old_price):
-            priceChange(old_price, new_price, company, webhook_url, url)
+            priceChange(old_price, new_price, company, webhook, url_variable)
 
 
 if __name__ == "__main__":
@@ -56,4 +59,4 @@ if __name__ == "__main__":
         sys.exit(1)
 
     webhook_url = sys.argv[1]
-    track_prices('../data/rvrc-data.csv', webhook_url)
+    track_prices('data/rvrc-data.csv', webhook_url)
