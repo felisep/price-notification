@@ -28,6 +28,9 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Unmask WEBHOOK_URL
+      run: |
+        echo "::add-mask::$WEBHOOK_URL"
     - name: Print environment variables
       run: |
         echo "WEBHOOK_URL: $WEBHOOK_URL"
