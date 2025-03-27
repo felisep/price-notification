@@ -16,6 +16,8 @@ def priceChange(old_price, new_price, company, webhook_url, url):
     if new_price_cleaned < old_price_cleaned:
         message = f"The price has gone down! It was {old_price_cleaned} kr, now it's {new_price_cleaned} kr. It has decreased by {old_price_cleaned - new_price_cleaned} kr for {company} page.\nLink: {url}"
         send_discord_message(message, webhook_url)
+    else:
+        print("Price has not changed")
 
 
 def send_discord_message(message, webhook):
