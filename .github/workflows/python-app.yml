@@ -26,7 +26,5 @@ jobs:
         python3 -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run price tracker
-      env:
-        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
       run: |
-        python3 src/csv-reader.py
+        python3 src/csv-reader.py ${{ secrets.WEBHOOK_URL }}
