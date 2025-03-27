@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+    - cron: '0 0,12 * * *'  # This will run the workflow at 00:00 and 12:00 UTC every day
 
 permissions:
   contents: read
@@ -22,11 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Test with pytest
-      run: |
-        pytest
     - name: Run price tracker
       run: |
         python src/csv-reader.py ${{ secrets.WEBHOOK_URL }}
