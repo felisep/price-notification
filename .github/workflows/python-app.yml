@@ -28,15 +28,6 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Unmask WEBHOOK_URL
-      run: |
-        echo "::add-mask::$WEBHOOK_URL"
-    - name: Print environment variables
-      run: |
-        echo "WEBHOOK_URL: $WEBHOOK_URL"
-    - name: Print secret WEBHOOK_URL
-      run: |
-        echo "Secret WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}"
     - name: Run price tracker
       run: |
-        python3 src/csv-reader.py
+        python3 src/csv-reader.py "$WEBHOOK_URL"
