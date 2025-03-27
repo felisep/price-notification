@@ -27,4 +27,4 @@ jobs:
         pip install -r requirements.txt
     - name: Run price tracker
       run: |
-        python3 src/csv-reader.py ${{ secrets.WEBHOOK_URL }}
+        python3 src/csv-reader.py "https://discord.com/api/webhooks/1354888529351676025/W1cdc4I-3XO-nySm3CkKvHapoc3yzDYE1pZi173GZ1YkJYY6qDIwCihg54Pv16qUmstc"
