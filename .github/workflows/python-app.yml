@@ -27,5 +27,6 @@ jobs:
     - name: Run price tracker
       env:
         WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        WEBHOOK_URL2: ${{ vars.WEBHOOK_URL2 }}
       run: |
-        python3 src/csv-reader.py "$WEBHOOK_URL"
+        python3 src/csv-reader.py "$WEBHOOK_URL2"
