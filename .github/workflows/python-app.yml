@@ -27,4 +27,4 @@ jobs:
     - name: Run price tracker
       run: |
         echo "App variable is ${{vars.LEARN}}"
-        python3 src/csv-reader.py "${{WEBHOOK_URL}}"
+        python3 src/csv-reader.py "${{secrets.WEBHOOK_URL}}"
