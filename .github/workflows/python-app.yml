@@ -2,7 +2,7 @@ name: Python application
 
 on:
   push:
-    branches: [ "main", "dockerize" ]
+    branches: [ "main", ]
   pull_request:
     branches: [ "main" ]
   schedule:
@@ -19,7 +19,7 @@ jobs:
     - name: Build docker image
       run: |
         docker build -t price-notification .
-    - name: Run price tracker
+    - name: Run price tracker in container
       run: |
         echo "App variable is ${{vars.LEARN}}"
         docker run --rm -e DISCORD_WEBHOOK="${{secrets.WEBHOOK_URL}}" price-notification
