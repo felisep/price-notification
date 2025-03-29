@@ -2,7 +2,7 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", ]
   pull_request:
     branches: [ "main" ]
   schedule:
@@ -16,15 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.12"
-    - name: Install dependencies
+    - name: Build docker image
       run: |
-        python3 -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run price tracker
+        docker build -t price-notification .
+    - name: Run price tracker in container
       run: |
         echo "App variable is ${{vars.LEARN}}"
-        python3 src/csv-reader.py "${{secrets.WEBHOOK_URL}}"
+        docker run --rm -e DISCORD_WEBHOOK="${{secrets.WEBHOOK_URL}}" price-notification
