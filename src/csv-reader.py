@@ -9,14 +9,12 @@ def clean_number(number):
     return str(number).replace('kr', '').replace(' ', '').replace(',', '').replace('\u00A0', '')
 
 
-def priceChange(old_price, new_price, company, webhook_url, url):
+def price_change(old_price, new_price, company, webhook, url):
     old_price_cleaned = int(clean_number(old_price))
     new_price_cleaned = int(clean_number(new_price))
     if new_price_cleaned < old_price_cleaned:
         message = f"The price has gone down! It was {old_price_cleaned} kr, now it's {new_price_cleaned} kr. It has decreased by {old_price_cleaned - new_price_cleaned} kr for {company} page.\nLink: {url}"
-        send_discord_message(message, webhook_url)
-    else:
-        print("Price has not changed")
+        send_discord_message(message, webhook)
 
 
 def send_discord_message(message, webhook):
@@ -47,10 +45,17 @@ def track_prices(file_path, webhook):
             print(f"Skipping invalid URL: {url_variable}")
             continue
 
-        new_price = scraper.get_page([url_variable], [selector])[0]
+        new_prices, html_contents = scraper.get_page([url_variable], [selector])
+        new_price = new_prices[0]
+        html_content = html_contents[0]
 
-        if new_price and clean_number(new_price) != clean_number(old_price):
-            priceChange(old_price, new_price, company, webhook, url_variable)
+        if new_price and html_content and scraper.check_medium_in_stock(html_content, selector):
+            if clean_number(new_price) != clean_number(old_price):
+                price_change(old_price, new_price, company, webhook, url_variable)
+            else:
+                print("Price has not changed")
+        else:
+            print("Item is not in stock or failed to retrieve price")
 
 
 if __name__ == "__main__":
