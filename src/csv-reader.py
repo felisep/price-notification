@@ -59,9 +59,9 @@ def track_prices(file_path, webhook):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python src/csv-reader.py <webhook_url>")
+    webhook_url = os.getenv('DISCORD_WEBHOOK')
+    if not webhook_url:
+        print("Environment variable DISCORD_WEBHOOK is not set.")
         sys.exit(1)
 
-    webhook_url = sys.argv[1]
     track_prices('data/rvrc-data.csv', webhook_url)

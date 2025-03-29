@@ -28,8 +28,12 @@ This project checks the price of an item from a given URL and notifies if there 
     ```
 
 ## Usage
+Build the docker image:
+```sh
+docker build -t price-notification .
+```
 
 To run the price notification script, use the following command:
 ```sh
-python src/csv-reader.py
+docker run --rm -e DISCORD_WEBHOOK="discord-webhook" price-notification
 
