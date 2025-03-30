@@ -1,2 +1,4 @@
 .idea
 src/__pycache__/scraper.cpython-312.pyc
+
+src/__pycache__/reader.cpython-312.pyc
