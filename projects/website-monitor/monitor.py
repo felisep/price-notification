@@ -102,7 +102,7 @@ class WebsiteMonitor:
             gray_diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
             
             # Use a higher threshold to ignore minor differences (anti-aliasing, font rendering)
-            _, thresh = cv2.threshold(gray_diff, 50, 255, cv2.THRESH_BINARY)  # Increased from 30 to 50
+            _, thresh = cv2.threshold(gray_diff, 80, 255, cv2.THRESH_BINARY)  # Increased from 50 to 80
             
             # Apply morphological operations to reduce noise
             kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
@@ -122,15 +122,15 @@ class WebsiteMonitor:
             
             # Draw rectangles around changed areas (only significant ones)
             for contour in contours:
-                if cv2.contourArea(contour) > 500:  # Increased from 100 to filter smaller changes
+                if cv2.contourArea(contour) > 1000:  # Increased from 500 to filter even smaller changes
                     x, y, w, h = cv2.boundingRect(contour)
                     cv2.rectangle(highlighted, (x, y), (x + w, y + h), (0, 0, 255), 3)
             
             # Save the highlighted diff image
             cv2.imwrite(diff_path, highlighted)
             
-            # Consider significant change if more than 2% of pixels changed (increased from 0.5%)
-            has_significant_change = change_percentage > 2.0
+            # Consider significant change if more than 5% of pixels changed (increased from 2.0%)
+            has_significant_change = change_percentage > 5.0
             
             return has_significant_change, change_percentage
             
@@ -218,7 +218,7 @@ class WebsiteMonitor:
             visual_change_detected, change_percentage = self.compare_screenshots(
                 previous_screenshot, current_screenshot, diff_screenshot
             )
-            print(f"Visual comparison: {change_percentage:.2f}% change detected (threshold: 2.0%)")
+            print(f"Visual comparison: {change_percentage:.2f}% change detected (threshold: 5.0%)")
         else:
             print("No previous screenshot found for comparison")
         # Determine if notification should be sent
