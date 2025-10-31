@@ -40,10 +40,29 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt
 
+            - name: Debug secrets
+              run: |
+                  echo "Checking webhook configuration..."
+                  if [ -n "$DISCORD_WEBHOOK" ]; then
+                    echo "✅ DISCORD_WEBHOOK is set"
+                  elif [ -n "$WEBHOOK_URL" ]; then
+                    echo "✅ WEBHOOK_URL is set (fallback)"
+                  else
+                    echo "❌ No webhook secrets found"
+                    echo "Available secrets should include: DISCORD_WEBHOOK or WEBHOOK_URL"
+                    exit 1
+                  fi
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+
             - name: Run price tracker
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
               run: |
+                  # Use DISCORD_WEBHOOK if available, otherwise fall back to WEBHOOK_URL
+                  export DISCORD_WEBHOOK="${DISCORD_WEBHOOK:-$WEBHOOK_URL}"
                   cd projects/price-tracker
                   python reader.py
 
@@ -65,16 +84,35 @@ jobs:
                   pip install -r requirements.txt
                   playwright install chromium
 
+            - name: Debug secrets
+              run: |
+                  echo "Checking webhook configuration..."
+                  if [ -n "$DISCORD_WEBHOOK" ]; then
+                    echo "✅ DISCORD_WEBHOOK is set"
+                  elif [ -n "$WEBHOOK_URL" ]; then
+                    echo "✅ WEBHOOK_URL is set (fallback)"
+                  else
+                    echo "❌ No webhook secrets found"
+                    echo "Available secrets should include: DISCORD_WEBHOOK or WEBHOOK_URL"
+                    exit 1
+                  fi
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+
             - name: Run website monitor
               env:
                   DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+                  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
               run: |
+                  # Use DISCORD_WEBHOOK if available, otherwise fall back to WEBHOOK_URL
+                  export DISCORD_WEBHOOK="${DISCORD_WEBHOOK:-$WEBHOOK_URL}"
                   cd projects/website-monitor
                   python monitor.py
 
             - name: Upload screenshots artifacts
               if: always()
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: website-screenshots
                   path: projects/website-monitor/screenshots/
