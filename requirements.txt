@@ -1,4 +1,12 @@
+# Shared dependencies
 pandas
 requests
 urllib3
 beautifulsoup4
+
+# Website monitoring dependencies
+playwright
+opencv-python
+Pillow
+numpy
+python-dotenv

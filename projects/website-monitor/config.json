@@ -1,0 +1,14 @@
+{
+  "websites": [
+    {
+      "name": "table_tennis_schedule",
+      "url": "https://www.laksevagbtk.no/hallen-var/",
+      "selectors": {
+        "main_content": "body",
+        "schedule_table": "table.schedule, .schedule",
+        "announcements": ".announcements, .news, .updates"
+      }
+    }
+  ],
+  "discord_webhook": ""
+}
