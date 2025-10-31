@@ -102,13 +102,20 @@ jobs:
 
             - name: Run website monitor
               env:
-                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-                  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK || secrets.WEBHOOK_URL }}
               run: |
-                  # Use DISCORD_WEBHOOK if available, otherwise fall back to WEBHOOK_URL
-                  export DISCORD_WEBHOOK="${DISCORD_WEBHOOK:-$WEBHOOK_URL}"
                   cd projects/website-monitor
                   python monitor.py
+
+            - name: Commit monitoring state
+              run: |
+                  git config --local user.email "action@github.com"
+                  git config --local user.name "GitHub Action Bot"
+                  git add projects/website-monitor/screenshots/ projects/website-monitor/data/ || true
+                  if ! git diff --quiet HEAD; then
+                    git commit -m "chore: update monitoring baselines [automated]" || true
+                    git push || true
+                  fi
 
             - name: Upload screenshots artifacts
               if: always()
