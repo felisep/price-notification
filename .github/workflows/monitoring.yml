@@ -117,10 +117,48 @@ jobs:
                     git push || true
                   fi
 
-            - name: Upload screenshots artifacts
-              if: always()
+            - name: Check for notifications and upload relevant artifacts
+              id: check_notifications
+              run: |
+                  cd projects/website-monitor/screenshots
+
+                  # Check if any notification flags exist
+                  if ls *.flag 1> /dev/null 2>&1; then
+                    echo "Notifications were sent, preparing artifacts..."
+                    
+                    # Create a directory for notification artifacts
+                    mkdir -p ../notification-artifacts
+                    
+                    # Process each notification flag
+                    for flag_file in *.flag; do
+                      website_name=$(basename "$flag_file" _notification_sent.flag)
+                      echo "Processing notification for: $website_name"
+                      
+                      # Read the flag file to get the image that was sent
+                      image_path=$(grep "Image used:" "$flag_file" | cut -d' ' -f3-)
+                      image_name=$(basename "$image_path")
+                      
+                      # Copy the notification image to artifacts directory
+                      if [ -f "$image_name" ]; then
+                        echo "Copying $image_name to artifacts..."
+                        cp "$image_name" "../notification-artifacts/"
+                      else
+                        echo "Warning: Image $image_name not found"
+                      fi
+                      
+                      # Also copy the flag file for reference
+                      cp "$flag_file" "../notification-artifacts/"
+                    done
+                    echo "upload_artifacts=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "No notifications were sent, skipping artifact upload"
+                    echo "upload_artifacts=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Upload notification artifacts
+              if: steps.check_notifications.outputs.upload_artifacts == 'true'
               uses: actions/upload-artifact@v4
               with:
-                  name: website-screenshots
-                  path: projects/website-monitor/screenshots/
-                  retention-days: 7
+                  name: website-notifications
+                  path: projects/website-monitor/notification-artifacts/
+                  retention-days: 30

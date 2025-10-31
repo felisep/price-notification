@@ -253,6 +253,14 @@ Please check the attached screenshot for highlighted differences.
             
             print(f"Change detected for {name}. Notification sent: {success}")
             
+            # Create notification flag file for GitHub Actions
+            if success:
+                notification_flag = os.path.join(self.screenshots_dir, f"{name}_notification_sent.flag")
+                with open(notification_flag, 'w') as f:
+                    f.write(f"Notification sent at {timestamp}\n")
+                    f.write(f"Image used: {diff_screenshot if visual_change_detected else current_screenshot}\n")
+                    f.write(f"Change percentage: {change_percentage:.2f}%\n")
+            
             # Move current screenshot to previous for next comparison
             if screenshot_success and os.path.exists(current_screenshot):
                 if os.path.exists(previous_screenshot):

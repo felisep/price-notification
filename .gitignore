@@ -21,6 +21,7 @@ venv/
 # Temporary screenshots are ignored
 projects/website-monitor/screenshots/*_diff.png
 projects/website-monitor/screenshots/*_current.png
+projects/website-monitor/screenshots/*.flag
 *.jpg
 *.jpeg
 
