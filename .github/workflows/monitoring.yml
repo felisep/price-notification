@@ -1,0 +1,77 @@
+name: Website and Price Monitoring
+
+on:
+    schedule:
+        # Run price tracker twice daily (9 AM and 6 PM UTC)
+        - cron: "0 9,18 * * *"
+        # Run website monitor twice daily (9 AM and 6 PM UTC)
+        - cron: "0 9,18 * * *"
+    workflow_dispatch:
+        inputs:
+            project:
+                description: "Which project to run"
+                required: true
+                default: "both"
+                type: choice
+                options:
+                    - both
+                    - price-tracker
+                    - website-monitor
+
+jobs:
+    price-tracker:
+        if: github.event_name == 'schedule' || github.event.inputs.project == 'both' || github.event.inputs.project == 'price-tracker'
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.12"
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+
+            - name: Run price tracker
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              run: |
+                  cd projects/price-tracker
+                  python reader.py
+
+    website-monitor:
+        if: github.event_name == 'schedule' || github.event.inputs.project == 'both' || github.event.inputs.project == 'website-monitor'
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.12"
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+                  playwright install chromium
+
+            - name: Run website monitor
+              env:
+                  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+              run: |
+                  cd projects/website-monitor
+                  python monitor.py
+
+            - name: Upload screenshots artifacts
+              if: always()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: website-screenshots
+                  path: projects/website-monitor/screenshots/
+                  retention-days: 7
