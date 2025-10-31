@@ -2,9 +2,9 @@ name: Website and Price Monitoring
 
 on:
     push:
-        branches: [ "main", "feat/page_monitor" ]  # Test on pushes to these branches
+        branches: ["main", "feat/page_monitor"] # Test on pushes to these branches
     pull_request:
-        branches: [ "main" ]  # Test on PRs to main
+        branches: ["main"] # Test on PRs to main
     schedule:
         # Run price tracker twice daily (9 AM and 6 PM UTC)
         - cron: "0 9,18 * * *"
