@@ -101,8 +101,13 @@ class WebsiteMonitor:
             diff = cv2.absdiff(img1, img2)
             gray_diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
             
-            # Threshold to get binary image
-            _, thresh = cv2.threshold(gray_diff, 30, 255, cv2.THRESH_BINARY)
+            # Use a higher threshold to ignore minor differences (anti-aliasing, font rendering)
+            _, thresh = cv2.threshold(gray_diff, 50, 255, cv2.THRESH_BINARY)  # Increased from 30 to 50
+            
+            # Apply morphological operations to reduce noise
+            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+            thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
             
             # Calculate percentage of changed pixels
             total_pixels = thresh.shape[0] * thresh.shape[1]
@@ -115,17 +120,17 @@ class WebsiteMonitor:
             # Find contours of changed areas
             contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
-            # Draw rectangles around changed areas
+            # Draw rectangles around changed areas (only significant ones)
             for contour in contours:
-                if cv2.contourArea(contour) > 100:  # Filter small changes
+                if cv2.contourArea(contour) > 500:  # Increased from 100 to filter smaller changes
                     x, y, w, h = cv2.boundingRect(contour)
                     cv2.rectangle(highlighted, (x, y), (x + w, y + h), (0, 0, 255), 3)
             
             # Save the highlighted diff image
             cv2.imwrite(diff_path, highlighted)
             
-            # Consider significant change if more than 0.5% of pixels changed
-            has_significant_change = change_percentage > 0.5
+            # Consider significant change if more than 2% of pixels changed (increased from 0.5%)
+            has_significant_change = change_percentage > 2.0
             
             return has_significant_change, change_percentage
             
@@ -140,6 +145,25 @@ class WebsiteMonitor:
             response.raise_for_status()
             
             soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Remove dynamic elements that change frequently
+            for element in soup.find_all(['script', 'style', 'noscript']):
+                element.decompose()
+            
+            # Remove elements with common dynamic classes/ids
+            dynamic_selectors = [
+                '[id*="timestamp"]', '[class*="timestamp"]',
+                '[id*="session"]', '[class*="session"]', 
+                '[id*="random"]', '[class*="random"]',
+                '[class*="ad"]', '[id*="ad"]',
+                '.cookie-banner', '.cookie-notice',
+                '[data-timestamp]', '[data-session]'
+            ]
+            
+            for selector in dynamic_selectors:
+                for element in soup.select(selector):
+                    element.decompose()
+            
             content = {}
             
             if selectors:
@@ -194,7 +218,9 @@ class WebsiteMonitor:
             visual_change_detected, change_percentage = self.compare_screenshots(
                 previous_screenshot, current_screenshot, diff_screenshot
             )
-        
+            print(f"Visual comparison: {change_percentage:.2f}% change detected (threshold: 2.0%)")
+        else:
+            print("No previous screenshot found for comparison")
         # Determine if notification should be sent
         should_notify = content_changed or visual_change_detected
         
